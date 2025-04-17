@@ -32,3 +32,12 @@ jobs:
 
       - name: Run tests
         run: dotnet test --no-build --verbosity normal
+
+      - name: Publish API binaries
+        run: dotnet publish --no-build --configuration ${{ inputs.configuration }} --output ./publish
+
+      - name: Upload API binaries as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-binaries
+          path: ./publish
