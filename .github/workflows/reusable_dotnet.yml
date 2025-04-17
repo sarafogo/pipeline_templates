@@ -37,7 +37,7 @@ jobs:
         run: dotnet publish --no-build --configuration ${{ inputs.configuration }} --output ./publish
 
       - name: Upload API binaries as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: api-binaries
           path: ./publish
