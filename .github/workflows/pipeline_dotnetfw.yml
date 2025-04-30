@@ -3,15 +3,13 @@ name: Pipeline Framework 4.7.2
 on:
   workflow_call:
     inputs:
-      solution:
-        description: 'Path to the solution file'
+      dotnet-version:
         required: true
         type: string
-      buildConfiguration:
-        description: 'Build configuration (e.g., Release or Debug)'
+      configuration:
         required: false
-        default: 'Release'
         type: string
+        default: Release
 
 jobs:
   build:
