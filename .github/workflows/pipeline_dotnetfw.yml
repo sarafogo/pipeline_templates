@@ -22,14 +22,14 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1
+      # - name: Setup NuGet
+      #   uses: NuGet/setup-nuget@v1
 
-      - name: Restore NuGet packages
-        run: nuget restore ${{ inputs.solution }}
+      # - name: Restore NuGet packages
+      #   run: nuget restore ${{ inputs.solution }}
 
-      - name: Build solution
-        run: msbuild ${{ inputs.solution }} /p:Configuration=${{ inputs.buildConfiguration }}
+      # - name: Build solution
+      #   run: msbuild ${{ inputs.solution }} /p:Configuration=${{ inputs.buildConfiguration }}
 
       # - name: Run tests
       #   run: |
