@@ -22,6 +22,10 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1
 
+      - name: Install Visual Studio Test Platform
+        run: |
+          choco install visualstudio2019buildtools --include-optional --yes
+          
       - name: Run tests
         run: |
           vstest.console.exe **\*Test*.dll
