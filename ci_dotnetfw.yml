@@ -1,0 +1,44 @@
+name: CI .NET Framework
+
+on:
+  workflow_call:
+    inputs:
+      org_lower:
+        required: true
+        type: string
+
+env:
+  ORG_LOWER: ${{ github.repository_owner }}
+  
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Set lower-case org
+        run: echo "ORG_LOWER=$(echo ${{ inputs.org_lower }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Debug ORG_LOWER
+        run: echo "ORG_LOWER=$ORG_LOWER"
+
+      - name: Official SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.TOKEN_SONAR }}
+        with:
+          args: >
+            -Dsonar.organization=${{ env.ORG_LOWER }}
+            -Dsonar.projectKey=${{ github.repository }}
+            -Dsonar.verbose=true
+            -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
+
+
