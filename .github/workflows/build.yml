@@ -1,16 +1,11 @@
-name: Reusable Build
+name: CI .NET Framework
 
 on:
-   workflow_call:
-    inputs:
-      dotnet-version:
-        required: true
-        type: string
-      configuration:
-        required: false
-        type: string
-        default: Release
-        
+  workflow_call:
+
+env:
+  ORG_LOWER: ${{ github.repository_owner }}
+  
 jobs:
   build:
     runs-on: windows-latest
@@ -24,3 +19,14 @@ jobs:
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
+
+      - name: Official SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.projectKey=${{ github.repository }}
+            -Dsonar.verbose=true
+            -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
