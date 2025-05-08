@@ -1,0 +1,26 @@
+name: Reusable Build
+
+on:
+   workflow_call:
+    inputs:
+      dotnet-version:
+        required: true
+        type: string
+      configuration:
+        required: false
+        type: string
+        default: Release
+        
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
