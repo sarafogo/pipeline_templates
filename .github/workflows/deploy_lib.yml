@@ -16,9 +16,6 @@ jobs:
       with:
         name: build-artifacts
 
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v2
-
     - name: Publish to GitHub Packages
       run: |
         nuget sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
