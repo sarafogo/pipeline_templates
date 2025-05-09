@@ -31,7 +31,7 @@ jobs:
         with:
           args: >
             -Dsonar.organization=${{ github.repository_owner }}
-            -Dsonar.projectKey=${{ github.repository }}
+            -Dsonar.projectKey=${{ github.event.repository.name }}
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
