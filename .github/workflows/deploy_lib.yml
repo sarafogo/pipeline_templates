@@ -1,0 +1,29 @@
+name: CD .NET Framework
+
+on:
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v4.3.0
+      with:
+        name: build-artifacts
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Publish to GitHub Packages
+      run: |
+        nuget sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
+        nuget push **/*.nupkg -Source "github" -SkipDuplicate
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
