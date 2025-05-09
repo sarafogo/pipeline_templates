@@ -2,6 +2,12 @@ name: CI .NET Framework
 
 on:
   workflow_call:
+    inputs:
+      enableSonar:
+        type: boolean
+        description: 'Enable SonarQube scan (true/false)'
+        required: false
+        default: true
 
 jobs:
   build:
@@ -17,7 +23,8 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
-      - name: Official SonarQube Scan
+      - name: Conditional SonarQube Scan
+        if: ${{ inputs.enableSonar == 'true' }}
         uses: SonarSource/sonarqube-scan-action@v5.2.0
         env:
           SONAR_TOKEN: ${{ secrets.TOKEN_SONAR }}
@@ -28,7 +35,6 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
-        
       - name: Run Tests
         run: |
           nuget restore
