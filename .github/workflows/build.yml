@@ -6,7 +6,7 @@ on:
       enableSonar:
         type: boolean
         description: 'Enable SonarQube scan (true/false)'
-        required: false
+        required: true
         default: true
 
 jobs:
