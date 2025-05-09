@@ -24,10 +24,11 @@ jobs:
         uses: NuGet/setup-nuget@v2
 
       - name: Conditional SonarQube Scan
-        if: ${{ inputs.enableSonar == 'true' }}
+        if: ${{ inputs.enableSonar == 'true' && env.TOKEN_SONAR }}
         uses: SonarSource/sonarqube-scan-action@v5.2.0
         env:
-          SONAR_TOKEN: ${{ secrets.TOKEN_SONAR }}
+          TOKEN_SONAR: ${{ secrets.TOKEN_SONAR }}
+          # TOKEN_SONAR_PRESENT: ${{ secrets.TOKEN_SONAR && 'true' || 'false' }}
         with:
           args: >
             -Dsonar.organization=${{ github.repository_owner }}
