@@ -23,12 +23,11 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
-      - name: Conditional SonarQube Scan
-        if: ${{ inputs.enableSonar == 'true' && env.TOKEN_SONAR }}
+      - name: Official SonarQube Scan
+        if: ${{ inputs.enableSonar == 'true' }}
         uses: SonarSource/sonarqube-scan-action@v5.2.0
         env:
-          TOKEN_SONAR: ${{ secrets.TOKEN_SONAR }}
-          # TOKEN_SONAR_PRESENT: ${{ secrets.TOKEN_SONAR && 'true' || 'false' }}
+          TOKEN_SONAR: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.organization=${{ github.repository_owner }}
@@ -36,6 +35,7 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
+        
       - name: Run Tests
         run: |
           nuget restore
