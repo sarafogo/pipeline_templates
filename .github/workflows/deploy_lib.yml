@@ -2,7 +2,10 @@ name: CD .NET Framework
 
 on:
   workflow_call:
-
+permissions:
+  contents: read
+  packages: write
+  
 jobs:
   deploy:
     runs-on: windows-latest
