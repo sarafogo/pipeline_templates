@@ -4,9 +4,10 @@ on:
   workflow_call:
     inputs:
       enableSonar:
-        type: boolean
-        required: true
-        default: false
+        type: string
+        required: false
+        default: 'true'
+        description: 'Enable SonarQube scan. Choices: true, false'
 
 jobs:
   build:
@@ -45,11 +46,11 @@ jobs:
           }
         shell: pwsh
 
-  #     - name: Save Build Artifacts
-  #       uses: actions/upload-artifact@v4.6.2
-  #       with:
-  #         name: build-artifacts
-  #         path: '**/bin/Release/'
+      - name: Save Build Artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: build-artifacts
+          path: '**/bin/Release/'
 
   # deploy:
   #   needs: build
