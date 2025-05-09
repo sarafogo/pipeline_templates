@@ -3,11 +3,10 @@ name: CI .NET Framework
 on:
   workflow_call:
     inputs:
-      enableSonar:
-        type: boolean
-        description: 'Enable SonarQube scan (true/false)'
-        required: true
-        default: true
+      enabled-sonar:
+        type: string
+        required: false
+        default: 'true'
 
 jobs:
   build:
@@ -24,7 +23,7 @@ jobs:
         uses: NuGet/setup-nuget@v2
 
       - name: Official SonarQube Scan
-        if: ${{ inputs.enableSonar == 'true' }}
+        if: ${{ inputs.enabled-sonar == 'true' }}
         uses: SonarSource/sonarqube-scan-action@v5.2.0
         env:
           TOKEN_SONAR: ${{ secrets.SONAR_TOKEN }}
