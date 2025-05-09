@@ -3,9 +3,6 @@ name: CI .NET Framework
 on:
   workflow_call:
 
-env:
-  ORG_LOWER: ${{ github.repository_owner }}
-  
 jobs:
   build:
     runs-on: windows-latest
@@ -30,3 +27,46 @@ jobs:
             -Dsonar.projectKey=${{ github.repository }}
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
+
+        
+      - name: Run Tests
+        run: |
+          nuget restore
+          msbuild /p:Configuration=Release
+          $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
+          foreach ($file in $testFiles) {
+            & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
+          }
+        shell: pwsh
+
+  #     - name: Save Build Artifacts
+  #       uses: actions/upload-artifact@v4.6.2
+  #       with:
+  #         name: build-artifacts
+  #         path: '**/bin/Release/'
+
+  # deploy:
+  #   needs: build
+  #   runs-on: windows-latest
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: Download a Build Artifact
+  #       uses: actions/download-artifact@v4.3.0
+  #       with:
+  #         name: build-artifacts
+
+  #     - name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ secrets.AWS_REGION }}
+
+  #     - name: Upload to S3
+  #       run: |
+  #         aws s3 cp build-artifacts/ s3://windowsapp-fw/windowsapp-repo/ --recursive
+
+          
