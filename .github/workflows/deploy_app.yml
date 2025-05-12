@@ -3,7 +3,6 @@ name: CD .NET Framework
 on:
   workflow_call:
 
-
 jobs:
   deploy:
     runs-on: windows-latest
@@ -17,4 +16,13 @@ jobs:
       with:
         name: build-artifacts
 
-        
+    - name: Upload to Azure Storage
+      run: |
+        az storage blob upload-batch \
+          --account-name <STORAGE_ACCOUNT_NAME> \
+          --account-key ${{ secrets.AZURE_STORAGE_KEY }} \
+          --destination <CONTAINER_NAME> \
+          --source .
+      env:
+        AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+

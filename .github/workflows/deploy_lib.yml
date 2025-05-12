@@ -3,7 +3,6 @@ name: CD .NET Framework
 on:
   workflow_call:
 
-
 jobs:
   deploy:
     runs-on: windows-latest
@@ -17,10 +16,15 @@ jobs:
       with:
         name: build-artifacts
 
+    - name: List NuGet Packages
+      run: dir **/*.nupkg
+
     - name: Publish to GitHub Packages
       run: |
+        echo "Starting to publish the package to GitHub Packages..."
         nuget sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
         nuget push **/*.nupkg -Source "github" -SkipDuplicate
+        echo "Package successfully published to GitHub Packages."
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

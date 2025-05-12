@@ -25,7 +25,7 @@ jobs:
 
       - name: Official SonarQube Scan
         if: ${{ inputs.enableSonar == 'true' }}
-        uses: SonarSource/sonarqube-scan-action@v5.2.0
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
@@ -47,7 +47,7 @@ jobs:
         shell: pwsh
 
       - name: Save Build Artifacts
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: '**/bin/Release/'
+          path: '**/bin/Release/*.nupkg'
