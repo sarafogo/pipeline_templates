@@ -55,7 +55,7 @@ jobs:
       - name: Debug Build Output
         run: |
           echo "Listing all files in the workspace:"
-          dir ${{ github.workspace }} /s
+          dir ${{ github.workspace }}
 
       - name: Save Build Artifacts
         uses: actions/upload-artifact@v4
