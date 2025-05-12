@@ -47,7 +47,10 @@ jobs:
         shell: pwsh
 
       - name: List Files in All Release Directories
-        run: dir **/bin/Release/ /s
+        run: |
+          echo "Listing all files in the Release directories:"
+          Get-ChildItem -Path **/bin/Release/ -Recurse
+        shell: pwsh
 
       - name: Debug Build Output
         run: |
