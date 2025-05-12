@@ -49,6 +49,11 @@ jobs:
       - name: List Files in Release Directory
         run: dir **/bin/Release/
 
+      - name: Debug Build Output
+        run: |
+          echo "Listing all files in the workspace:"
+          dir /s
+
       - name: Save Build Artifacts
         uses: actions/upload-artifact@v4
         with:
