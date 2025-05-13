@@ -43,14 +43,19 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
+      - name: Build and Create NuGet Package
+        run: |
+          msbuild /t:Restore,Build /p:Configuration=Release
+        shell: pwsh
+
       - name: Create NuGet package
         run: |
-          $nuspecFile = Get-ChildItem -Recurse -Filter *.nupkg | Select-Object -First 1
-          if (-not $nupkgFile) {
-            Write-Error "No .nupkg file found!"
-            exit 1
+          $nuspecFile = Get-ChildItem -Recurse -Filter *.nuspec | Select-Object -First 1
+          if (-not $nuspecFile) {
+              Write-Error "No .nuspec file found!"
+              exit 1
           }
-          nuget pack $nupkgFile.FullName -OutputDirectory ./artifacts/
+          nuget pack $nuspecFile.FullName -OutputDirectory ./artifacts/
         shell: pwsh
    
       - name: Run Tests
@@ -78,6 +83,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: artifacts/*.nupkg
+          path: '**/bin/Release/*.nupkg'
           if-no-files-found: warn
 
