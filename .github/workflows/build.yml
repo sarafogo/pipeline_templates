@@ -20,6 +20,14 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      
+
+      # - name: Create NuGet package manually
+      #   run: |
+      #     nuget pack .\ClassLibraryProject\ClassLibraryProject.nuspec -OutputDirectory .\artifacts\
+      #   shell: pwsh
+
+
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
@@ -35,7 +43,16 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
-        
+      - name: Create NuGet package
+        run: |
+          $nuspecFile = Get-ChildItem -Recurse -Filter *.nuspec | Select-Object -First 1
+          if (-not $nuspecFile) {
+            Write-Error "No .nuspec file found!"
+            exit 1
+          }
+          nuget pack $nuspecFile.FullName -OutputDirectory ./artifacts/
+        shell: pwsh
+   
       - name: Run Tests
         run: |
           nuget restore
@@ -61,4 +78,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: '**/bin/Release/**/*.nupkg'
+          path: artifacts/*.nupkg
+          if-no-files-found: warn
+
