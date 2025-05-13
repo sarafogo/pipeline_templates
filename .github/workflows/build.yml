@@ -48,15 +48,15 @@ jobs:
           msbuild /t:Restore,Build /p:Configuration=Release
         shell: pwsh
 
-      - name: Create NuGet package
-        run: |
-          $nuspecFile = Get-ChildItem -Recurse -Filter *.nuspec | Select-Object -First 1
-          if (-not $nuspecFile) {
-              Write-Error "No .nuspec file found!"
-              exit 1
-          }
-          nuget pack $nuspecFile.FullName -OutputDirectory ./artifacts/
-        shell: pwsh
+      # - name: Create NuGet package
+      #   run: |
+      #     $nuspecFile = Get-ChildItem -Recurse -Filter *.nuspec | Select-Object -First 1
+      #     if (-not $nuspecFile) {
+      #         Write-Error "No .nuspec file found!"
+      #         exit 1
+      #     }
+      #     nuget pack $nuspecFile.FullName -OutputDirectory ./artifacts/
+      #   shell: pwsh
    
       - name: Run Tests
         run: |
