@@ -1,4 +1,4 @@
-name: CD .NET Framework
+name: Deploy Windows Forms Application
 
 on:
   workflow_call:
@@ -17,13 +17,20 @@ jobs:
         curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           https://api.github.com/repos/${{ github.repository }}/actions/artifacts
 
-    - name: Download a Build Artifact
-      uses: actions/download-artifact@v4.3.0
+    - name: Download Build Artifact
+      uses: actions/download-artifact@v4
       with:
         name: build-artifacts
 
+    - name: List Downloaded Files
+      run: |
+        echo "Listing downloaded files..."
+        dir /s
+      shell: cmd
+
     - name: Upload to Azure Storage
       run: |
+        echo "Uploading files to Azure Storage..."
         az storage blob upload-batch \
           --account-name <STORAGE_ACCOUNT_NAME> \
           --account-key ${{ secrets.AZURE_STORAGE_KEY }} \

@@ -74,54 +74,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: ./artifacts/*.nupkg
+          path: 
+            ./artifacts/*.nupkg
+            '**/bin/Release/*.exe'
           if-no-files-found: warn
-
-      # - name: Restore NuGet Packages
-      #   run: |
-      #     nuget restore
-      #   shell: pwsh
-
-      # - name: Build and Create NuGet Package
-      #   run: |
-      #     msbuild /t:Restore,Build /p:OutDir=${{ github.workspace }}/build-output
-      #   shell: pwsh
-
-      # - name: Create NuGet package
-      #   run: |
-      #     $nuspecFile = Get-ChildItem -Recurse -Filter *.nuspec | Select-Object -First 1
-      #     if (-not $nuspecFile) {
-      #         Write-Error "No .nuspec file found!"
-      #         exit 1
-      #     }
-      #     nuget pack $nuspecFile.FullName -OutputDirectory ./artifacts/
-      #   shell: pwsh
-   
-      # - name: Run Tests
-      #   run: |
-      #     nuget restore
-      #     msbuild /p:Configuration=Release
-      #     $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
-      #     foreach ($file in $testFiles) {
-      #       & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
-      #     }
-      #   shell: pwsh
-
-      # - name: List Files in All Release Directories
-      #   run: |
-      #     echo "Listing all files in the Release directories:"
-      #     Get-ChildItem -Path **/bin/Release/ -Recurse
-      #   shell: pwsh
-
-      # - name: Debug Build Output
-      #   run: |
-      #     echo "Listing all files in the workspace:"
-      #     dir ${{ github.workspace }}
-
-      # - name: Save Build Artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: build-artifacts
-      #     path: '*.nuspec,*.nupkg,./*.nuspec,./*.nupkg'
-      #     if-no-files-found: warn
-
