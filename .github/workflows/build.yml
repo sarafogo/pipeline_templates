@@ -83,6 +83,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: '**/bin/Release/*.nuspec,**/bin/Release/*.dll,**/bin/Release/*.exe,**/bin/Release/*.nupkg'
+          path: '*.nuspec,*.nupkg,./*.nuspec,./*.nupkg'
           if-no-files-found: warn
 
