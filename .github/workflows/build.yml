@@ -23,6 +23,14 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
+      - name: Restore NuGet packages
+        run: nuget restore
+        shell: pwsh
+
+      - name: Build Solution
+        run: msbuild /p:Configuration=Release
+        shell: pwsh
+
       - name: Official SonarQube Scan
         if: ${{ inputs.enableSonar == 'true' }}
         uses: SonarSource/sonarqube-scan-action@v5
@@ -35,15 +43,45 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
-      - name: Restore NuGet Packages
+      - name: Run Tests
         run: |
-          nuget restore
+          $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
+          if ($testFiles.Count -eq 0) {
+            Write-Host "No test assemblies found."
+          } else {
+            foreach ($file in $testFiles) {
+              & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
+            }
+          }
         shell: pwsh
 
-      - name: Build and Create NuGet Package
+      - name: Create NuGet packages
         run: |
-          msbuild /t:Restore,Build /p:OutDir=${{ github.workspace }}/build-output
+          $nuspecFiles = Get-ChildItem -Path . -Filter *.nuspec -Recurse
+          New-Item -ItemType Directory -Path artifacts -Force | Out-Null
+          foreach ($nuspec in $nuspecFiles) {
+            Write-Host "Packing $($nuspec.FullName)..."
+            nuget pack $nuspec.FullName -OutputDirectory ./artifacts
+          }
         shell: pwsh
+
+    
+      - name: Upload NuGet Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: ./artifacts/*.nupkg
+          if-no-files-found: warn
+          
+      # - name: Restore NuGet Packages
+      #   run: |
+      #     nuget restore
+      #   shell: pwsh
+
+      # - name: Build and Create NuGet Package
+      #   run: |
+      #     msbuild /t:Restore,Build /p:OutDir=${{ github.workspace }}/build-output
+      #   shell: pwsh
 
       # - name: Create NuGet package
       #   run: |
@@ -55,31 +93,31 @@ jobs:
       #     nuget pack $nuspecFile.FullName -OutputDirectory ./artifacts/
       #   shell: pwsh
    
-      - name: Run Tests
-        run: |
-          nuget restore
-          msbuild /p:Configuration=Release
-          $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
-          foreach ($file in $testFiles) {
-            & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
-          }
-        shell: pwsh
+      # - name: Run Tests
+      #   run: |
+      #     nuget restore
+      #     msbuild /p:Configuration=Release
+      #     $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
+      #     foreach ($file in $testFiles) {
+      #       & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
+      #     }
+      #   shell: pwsh
 
-      - name: List Files in All Release Directories
-        run: |
-          echo "Listing all files in the Release directories:"
-          Get-ChildItem -Path **/bin/Release/ -Recurse
-        shell: pwsh
+      # - name: List Files in All Release Directories
+      #   run: |
+      #     echo "Listing all files in the Release directories:"
+      #     Get-ChildItem -Path **/bin/Release/ -Recurse
+      #   shell: pwsh
 
-      - name: Debug Build Output
-        run: |
-          echo "Listing all files in the workspace:"
-          dir ${{ github.workspace }}
+      # - name: Debug Build Output
+      #   run: |
+      #     echo "Listing all files in the workspace:"
+      #     dir ${{ github.workspace }}
 
-      - name: Save Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: '*.nuspec,*.nupkg,./*.nuspec,./*.nupkg'
-          if-no-files-found: warn
+      # - name: Save Build Artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: build-artifacts
+      #     path: '*.nuspec,*.nupkg,./*.nuspec,./*.nupkg'
+      #     if-no-files-found: warn
 
