@@ -20,14 +20,6 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      
-
-      # - name: Create NuGet package manually
-      #   run: |
-      #     nuget pack .\ClassLibraryProject\ClassLibraryProject.nuspec -OutputDirectory .\artifacts\
-      #   shell: pwsh
-
-
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
@@ -43,9 +35,14 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
+      - name: Restore NuGet Packages
+        run: |
+          nuget restore
+        shell: pwsh
+
       - name: Build and Create NuGet Package
         run: |
-          msbuild /t:Restore,Build /p:Configuration=Release
+          msbuild /t:Restore,Build /p:OutDir=${{ github.workspace }}/build-output
         shell: pwsh
 
       # - name: Create NuGet package
