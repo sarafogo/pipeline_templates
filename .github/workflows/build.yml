@@ -11,6 +11,7 @@ on:
       artifacts-type:
         type: string
         required: true
+        default: 'lib'
         description: 'Type of artifacts to publish. Choices: lib, app'
 
 jobs:
