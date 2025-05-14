@@ -32,9 +32,15 @@ jobs:
         run: nuget restore
         shell: pwsh
 
-      - name: Build Solution
-        run: msbuild /p:Configuration=Release
+      - name: Build solution
+        run: |
+          $sln = Get-ChildItem -Path . -Filter *.sln -Recurse | Select-Object -First 1
+          msbuild $sln.FullName /p:Configuration=Release
         shell: pwsh
+
+      # - name: Build Solution
+      #   run: msbuild /p:Configuration=Release
+      #   shell: pwsh
 
       - name: Official SonarQube Scan
         if: ${{ inputs.enableSonar == 'true' }}
@@ -64,15 +70,15 @@ jobs:
         run: Get-ChildItem -Recurse -Path .\ -Filter *.dll
         shell: pwsh
 
-      - name: Create NuGet packages
-        run: |
-          $nuspecFiles = Get-ChildItem -Path . -Filter *.nuspec -Recurse
-          New-Item -ItemType Directory -Path artifacts -Force | Out-Null
-          foreach ($nuspec in $nuspecFiles) {
-            Write-Host "Packing $($nuspec.FullName)..."
-            nuget pack $nuspec.FullName -OutputDirectory ./artifacts
-          }
-        shell: pwsh
+      # - name: Create NuGet packages
+      #   run: |
+      #     $nuspecFiles = Get-ChildItem -Path . -Filter *.nuspec -Recurse
+      #     New-Item -ItemType Directory -Path artifacts -Force | Out-Null
+      #     foreach ($nuspec in $nuspecFiles) {
+      #       Write-Host "Packing $($nuspec.FullName)..."
+      #       nuget pack $nuspec.FullName -OutputDirectory ./artifacts
+      #     }
+      #   shell: pwsh
 
     
       - name: Upload NuGet Artifacts
@@ -97,12 +103,14 @@ jobs:
       - name: Upload to Azure Storage
         if: ${{ inputs.artifacts-type == 'app' }}
         run: |
-          echo "Uploading files to Azure Storage..."
-          az storage blob upload-batch \
+          echo "Zipping files before uploading to Azure Storage..."
+          Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
+          echo "Uploading zipped file to Azure Storage..."
+          az storage blob upload \
             --account-name projetodotnet \
             --account-key ${{ secrets.AZURE_STORAGE_KEY }} \
-            --destination windowsformapp \
-            --source .
-            --destination-path ${{ github.event.repository.name }}
+            --container-name windowsformapp \
+            --file ./artifacts/app.zip \
+            --name ${{ github.event.repository.name }}.zip
         env:
           AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
