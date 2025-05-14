@@ -86,7 +86,7 @@ jobs:
         with:
           name: build-artifacts
           path: 
-            ./artifacts/*.nupkg
+            ./artifacts/*
             # **/bin/Release/*.exe
           if-no-files-found: warn
 
