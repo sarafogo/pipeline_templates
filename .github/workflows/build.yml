@@ -8,6 +8,11 @@ on:
         required: false
         default: 'true'
         description: 'Enable SonarQube scan. Choices: true, false'
+      artifacts-type:
+        type: string
+        required: true
+        default: 'lib'
+        description: 'Type of artifacts to publish. Choices: lib, app'
 
 jobs:
   build:
@@ -28,7 +33,7 @@ jobs:
         shell: pwsh
 
       - name: Build Solution
-        run: msbuild /p:Configuration=Release/p:OutDir=${{ github.workspace }}/build-output
+        run: msbuild /p:Configuration=Release
         shell: pwsh
 
       - name: Official SonarQube Scan
@@ -45,22 +50,15 @@ jobs:
 
       - name: Run Tests
         run: |
-          $env:PATH = ";C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform"
-          if (-not (Get-ChildItem -Path . -Recurse -Include *test*.dll)) {
-            Write-Warning "Projeto de teste não encontrado. Ignorando execução de testes."
-            Exit 0
+          $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
+          if ($testFiles.Count -eq 0) {
+            Write-Host "No test assemblies found."
+          } else {
+            foreach ($file in $testFiles) {
+              & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
             }
-        
-            vstest.console.exe "**\*test*.dll" /ResultsDirectory:"${{ github.workspace }}/build-output" /logger:"trx;LogFileName=test-results.xml"  
-        #   $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
-        #   if ($testFiles.Count -eq 0) {
-        #     Write-Host "No test assemblies found."
-        #   } else {
-        #     foreach ($file in $testFiles) {
-        #       & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
-        #     }
-        #   }
-        # shell: pwsh
+          }
+        shell: pwsh
 
       - name: List build outputs
         run: Get-ChildItem -Recurse -Path .\ -Filter *.dll
@@ -86,3 +84,12 @@ jobs:
             '**/bin/Release/*.exe'
           if-no-files-found: warn
 
+      - name: Publish to GitHub Packages
+        if: ${{ inputs.artifacts-type == 'lib' }}
+        run: |
+          echo "Starting to publish the package to GitHub Packages..."
+          nuget sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
+          nuget push **/*.nupkg -Source "github" -SkipDuplicate
+          echo "Package successfully published to GitHub Packages."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
