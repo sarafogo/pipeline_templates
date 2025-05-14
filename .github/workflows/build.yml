@@ -55,6 +55,10 @@ jobs:
           }
         shell: pwsh
 
+      - name: List build outputs
+        run: Get-ChildItem -Recurse -Path .\ -Filter *.dll
+        shell: pwsh
+
       - name: Create NuGet packages
         run: |
           $nuspecFiles = Get-ChildItem -Path . -Filter *.nuspec -Recurse
@@ -72,7 +76,7 @@ jobs:
           name: build-artifacts
           path: ./artifacts/*.nupkg
           if-no-files-found: warn
-          
+
       # - name: Restore NuGet Packages
       #   run: |
       #     nuget restore
