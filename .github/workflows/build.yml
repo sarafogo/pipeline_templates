@@ -80,15 +80,15 @@ jobs:
       #   run: Get-ChildItem -Recurse -Path .\ -Filter *.dll
       #   shell: pwsh
 
-      # - name: Create NuGet packages
-      #   run: |
-      #     $nuspecFiles = Get-ChildItem -Path . -Filter *.nuspec -Recurse
-      #     New-Item -ItemType Directory -Path artifacts -Force | Out-Null
-      #     foreach ($nuspec in $nuspecFiles) {
-      #       Write-Host "Packing $($nuspec.FullName)..."
-      #       nuget pack $nuspec.FullName -OutputDirectory ./artifacts
-      #     }
-      #   shell: pwsh
+      - name: Create NuGet packages
+        run: |
+          $nuspecFiles = Get-ChildItem -Path . -Filter *.nuspec -Recurse
+          New-Item -ItemType Directory -Path artifacts -Force | Out-Null
+          foreach ($nuspec in $nuspecFiles) {
+            Write-Host "Packing $($nuspec.FullName)..."
+            nuget pack $nuspec.FullName -OutputDirectory ./artifacts
+          }
+        shell: pwsh
 
     
       - name: Upload NuGet Artifacts
