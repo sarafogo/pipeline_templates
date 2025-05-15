@@ -76,19 +76,27 @@ jobs:
           $testOutputFiles | ForEach-Object { Write-Host $_ }
           }
         shell: pwsh
-      # - name: List build outputs
-      #   run: Get-ChildItem -Recurse -Path .\ -Filter *.dll
-      #   shell: pwsh
 
-      - name: Create NuGet packages
+      - name: Create Package from .csproj
         run: |
-          $nuspecFiles = Get-ChildItem -Path . -Filter *.nuspec -Recurse
+          $csprojFiles = Get-ChildItem -Path . -Filter *.csproj -Recurse
           New-Item -ItemType Directory -Path artifacts -Force | Out-Null
-          foreach ($nuspec in $nuspecFiles) {
-            Write-Host "Packing $($nuspec.FullName)..."
-            nuget pack $nuspec.FullName -OutputDirectory ./artifacts
+          foreach ($csproj in $csprojFiles) {
+          Write-Host "Packing $($csproj.FullName)..."
+          dotnet pack $csproj.FullName --configuration Release --output ./artifacts
           }
         shell: pwsh
+
+
+      # - name: Create NuGet packages
+      #   run: |
+      #     $nuspecFiles = Get-ChildItem -Path . -Filter *.nuspec -Recurse
+      #     New-Item -ItemType Directory -Path artifacts -Force | Out-Null
+      #     foreach ($nuspec in $nuspecFiles) {
+      #       Write-Host "Packing $($nuspec.FullName)..."
+      #       nuget pack $nuspec.FullName -OutputDirectory ./artifacts
+      #     }
+      #   shell: pwsh
 
     
       - name: Upload NuGet Artifacts
