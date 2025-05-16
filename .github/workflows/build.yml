@@ -33,6 +33,12 @@ jobs:
         run: msbuild /p:Configuration=Release
         shell: pwsh
 
+      - name: List Build Outputs
+        run: |
+          echo "Listing files in bin/Release:"
+          Get-ChildItem -Path "**/bin/Release/" -Recurse
+        shell: pwsh
+        
       # - name: Official SonarQube Scan
       #   if: ${{ inputs.enableSonar == 'true' }}
       #   uses: SonarSource/sonarqube-scan-action@v5
