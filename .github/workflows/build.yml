@@ -39,18 +39,17 @@ jobs:
           Get-ChildItem -Path "**/bin/Release/" -Recurse
         shell: pwsh
 
-
-      # - name: Official SonarQube Scan
-      #   if: ${{ inputs.enableSonar == 'true' }}
-      #   uses: SonarSource/sonarqube-scan-action@v5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   with:
-      #     args: >
-      #       -Dsonar.organization=${{ github.repository_owner }}
-      #       -Dsonar.projectKey=${{ github.event.repository.name }}
-      #       -Dsonar.verbose=true
-      #       -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
+      - name: Official SonarQube Scan
+        if: ${{ inputs.enableSonar == 'true' }}
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.verbose=true
+            -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
       # - name: Run Tests
       #   run: |
