@@ -11,22 +11,22 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # - name: List Available Artifacts
-    #   run: |
-    #     echo "Listing available artifacts..."
-    #     curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-    #       https://api.github.com/repos/${{ github.repository }}/actions/artifacts
+    - name: List Available Artifacts
+      run: |
+        echo "Listing available artifacts..."
+        curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          https://api.github.com/repos/${{ github.repository }}/actions/artifacts
 
     - name: Download Build Artifact
       uses: actions/download-artifact@v4
       with:
         name: build-artifacts
 
-    # - name: List Downloaded Files
-    #   run: |
-    #     echo "Listing downloaded files..."
-    #     dir /s
-    #   shell: cmd
+    - name: List Downloaded Files
+      run: |
+        echo "Listing downloaded files..."
+        dir /s
+      shell: cmd
 
     - name: Upload to Azure Storage
       run: |
@@ -41,4 +41,8 @@ jobs:
           --name ${{ github.event.repository.name }}.zip
       env:
         AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+
+    - name: List Blobs in Container
+      run: |
+        az storage blob list --account-name projetodotnet --account-key ${{ secrets.AZURE_STORAGE_KEY }} --container-name windowsformapp
 
