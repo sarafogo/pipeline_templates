@@ -8,11 +8,6 @@ on:
         required: false
         default: 'true'
         description: 'Enable SonarQube scan. Choices: true, false'
-      artifacts-type:
-        type: string
-        required: true
-        default: 'lib'
-        description: 'Type of artifacts to publish. Choices: lib, app'
 
 jobs:
   build:
@@ -28,109 +23,84 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
-      - name: Build solution
-        run: |
-          $sln = Get-ChildItem -Path . -Filter *.sln -Recurse | Select-Object -First 1
-          msbuild $sln.FullName /p:Configuration=Release
-        shell: pwsh
-
-      # - name: Build Solution
-      #   run: msbuild /p:Configuration=Release
+      # - name: Build solution
+      #   run: |
+      #     $sln = Get-ChildItem -Path . -Filter *.sln -Recurse | Select-Object -First 1
+      #     msbuild $sln.FullName /p:Configuration=Release
       #   shell: pwsh
 
-      - name: Official SonarQube Scan
-        if: ${{ inputs.enableSonar == 'true' }}
-        uses: SonarSource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=${{ github.repository_owner }}
-            -Dsonar.projectKey=${{ github.event.repository.name }}
-            -Dsonar.verbose=true
-            -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
+      # # - name: Build Solution
+      # #   run: msbuild /p:Configuration=Release
+      # #   shell: pwsh
 
-      - name: Run Tests
-        run: |
-          $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
-          if ($testFiles.Count -eq 0) {
-            Write-Host "No test assemblies found."
-          } else {
-            foreach ($file in $testFiles) {
-              & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
-            }
-          }
-        shell: pwsh
+      # - name: Official SonarQube Scan
+      #   if: ${{ inputs.enableSonar == 'true' }}
+      #   uses: SonarSource/sonarqube-scan-action@v5
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   with:
+      #     args: >
+      #       -Dsonar.organization=${{ github.repository_owner }}
+      #       -Dsonar.projectKey=${{ github.event.repository.name }}
+      #       -Dsonar.verbose=true
+      #       -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
-      - name: List Test Outputs
-        run: |
-          $testOutputFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.dll" -Recurse | ForEach-Object { $_.FullName }
-          if ($testOutputFiles.Count -eq 0) {
-          Write-Host "No test output files found."
-            } else {
-          Write-Host "Test output files:"
-          $testOutputFiles | ForEach-Object { Write-Host $_ }
-          }
-        shell: pwsh
-
-      - name: Create Package from .csproj
-        run: |
-          $csprojFiles = Get-ChildItem -Path . -Filter *.csproj -Recurse
-          New-Item -ItemType Directory -Path artifacts -Force | Out-Null
-          foreach ($csproj in $csprojFiles) {
-          Write-Host "Packing $($csproj.FullName)..."
-          dotnet pack $csproj.FullName --configuration Release --output ./artifacts
-          }
-        shell: pwsh
-
-
-      # - name: Create NuGet packages
+      # - name: Run Tests
       #   run: |
-      #     $nuspecFiles = Get-ChildItem -Path . -Filter *.nuspec -Recurse
-      #     New-Item -ItemType Directory -Path artifacts -Force | Out-Null
-      #     foreach ($nuspec in $nuspecFiles) {
-      #       Write-Host "Packing $($nuspec.FullName)..."
-      #       nuget pack $nuspec.FullName -OutputDirectory ./artifacts
+      #     $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
+      #     if ($testFiles.Count -eq 0) {
+      #       Write-Host "No test assemblies found."
+      #     } else {
+      #       foreach ($file in $testFiles) {
+      #         & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
+      #       }
       #     }
       #   shell: pwsh
 
+      # - name: List Test Outputs
+      #   run: |
+      #     $testOutputFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.dll" -Recurse | ForEach-Object { $_.FullName }
+      #     if ($testOutputFiles.Count -eq 0) {
+      #     Write-Host "No test output files found."
+      #       } else {
+      #     Write-Host "Test output files:"
+      #     $testOutputFiles | ForEach-Object { Write-Host $_ }
+      #     }
+      #   shell: pwsh
+
+      # - name: Create Package from .csproj
+      #   run: |
+      #     $csprojFiles = Get-ChildItem -Path . -Filter *.csproj -Recurse
+      #     New-Item -ItemType Directory -Path artifacts -Force | Out-Null
+      #     foreach ($csproj in $csprojFiles) {
+      #     Write-Host "Packing $($csproj.FullName)..."
+      #     dotnet pack $csproj.FullName --configuration Release --output ./artifacts
+      #     }
+      #   shell: pwsh
+
+
+      # # - name: Create NuGet packages
+      # #   run: |
+      # #     $nuspecFiles = Get-ChildItem -Path . -Filter *.nuspec -Recurse
+      # #     New-Item -ItemType Directory -Path artifacts -Force | Out-Null
+      # #     foreach ($nuspec in $nuspecFiles) {
+      # #       Write-Host "Packing $($nuspec.FullName)..."
+      # #       nuget pack $nuspec.FullName -OutputDirectory ./artifacts
+      # #     }
+      # #   shell: pwsh
+
     
-      - name: Upload NuGet Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: 
-            ./artifacts/*
-            # **/bin/Release/*.exe
-          if-no-files-found: warn
+      # - name: Upload NuGet Artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: build-artifacts
+      #     path: 
+      #       ./artifacts/*
+      #       # **/bin/Release/*.exe
+      #     if-no-files-found: warn
 
-      - name: Debug Artifact Path
-        run: |
-          echo "Checking the path for NuGet artifacts..."
-          Get-ChildItem -Path ./artifacts/* -Recurse | ForEach-Object { Write-Host $_.FullName }
-        shell: pwsh
-
-      - name: Publish to GitHub Packages
-        if: ${{ inputs.artifacts-type == 'lib' }}
-        run: |
-          echo "Starting to publish the package to GitHub Packages..."
-          nuget sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
-          nuget push **/*.nupkg -Source "github" -SkipDuplicate
-          echo "Package successfully published to GitHub Packages."
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload to Azure Storage
-        if: ${{ inputs.artifacts-type == 'app' }}
-        run: |
-          echo "Zipping files before uploading to Azure Storage..."
-          Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
-          echo "Uploading zipped file to Azure Storage..."
-          az storage blob upload \
-            --account-name projetodotnet \
-            --account-key ${{ secrets.AZURE_STORAGE_KEY }} \
-            --container-name windowsformapp \
-            --file ./artifacts/app.zip \
-            --name ${{ github.event.repository.name }}.zip
-        env:
-          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+      # - name: Debug Artifact Path
+      #   run: |
+      #     echo "Checking the path for NuGet artifacts..."
+      #     Get-ChildItem -Path ./artifacts/* -Recurse | ForEach-Object { Write-Host $_.FullName }
+      #   shell: pwsh
