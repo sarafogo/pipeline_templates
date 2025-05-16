@@ -28,10 +28,6 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
-      - name: Restore NuGet packages
-        run: nuget restore
-        shell: pwsh
-
       - name: Build solution
         run: |
           $sln = Get-ChildItem -Path . -Filter *.sln -Recurse | Select-Object -First 1
