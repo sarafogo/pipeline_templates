@@ -45,6 +45,11 @@ jobs:
         # Remove o arquivo ZIP existente, se houver
         if (Test-Path -Path ./artifacts/app.zip) {
           Remove-Item -Path ./artifacts/app.zip -Force
+          Start-Sleep -Seconds 2
+          if (Test-Path -Path ./artifacts/app.zip) {
+            Write-Error "Failed to remove the existing ZIP file. It may still be in use."
+            exit 1
+          }
         }
         Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
       shell: pwsh
