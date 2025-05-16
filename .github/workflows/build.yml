@@ -23,21 +23,22 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
+      - name: Restore NuGet Packages
+        run: nuget restore
+        shell: pwsh
+
       - name: Build solution
         run: |
           $sln = Get-ChildItem -Path . -Filter *.sln -Recurse | Select-Object -First 1
           msbuild $sln.FullName /p:Configuration=Release
         shell: pwsh
 
-      # - name: Build Solution
-      #   run: msbuild /p:Configuration=Release
-      #   shell: pwsh
-
       - name: List Build Outputs
         run: |
           echo "Listing files in bin/Release:"
           Get-ChildItem -Path "**/bin/Release/" -Recurse
         shell: pwsh
+
 
       # - name: Official SonarQube Scan
       #   if: ${{ inputs.enableSonar == 'true' }}
@@ -95,7 +96,7 @@ jobs:
       # #     }
       # #   shell: pwsh
 
-    
+
       # - name: Upload NuGet Artifacts
       #   uses: actions/upload-artifact@v4
       #   with:
