@@ -42,6 +42,10 @@ jobs:
         if (-not (Test-Path -Path ./artifacts)) {
           New-Item -ItemType Directory -Path ./artifacts | Out-Null
         }
+        # Remove o arquivo ZIP existente, se houver
+        if (Test-Path -Path ./artifacts/app.zip) {
+          Remove-Item -Path ./artifacts/app.zip -Force
+        }
         Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
       shell: pwsh
 
