@@ -30,12 +30,15 @@ jobs:
 
     - name: Upload to Azure Storage
       run: |
-        echo "Uploading files to Azure Storage..."
-        az storage blob upload-batch \
-          --account-name <STORAGE_ACCOUNT_NAME> \
+        echo "Zipping files before uploading to Azure Storage..."
+        Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
+        echo "Uploading zipped file to Azure Storage..."
+        az storage blob upload \
+          --account-name projetodotnet \
           --account-key ${{ secrets.AZURE_STORAGE_KEY }} \
-          --destination <CONTAINER_NAME> \
-          --source .
+          --container-name windowsformapp \
+          --file ./artifacts/app.zip \
+          --name ${{ github.event.repository.name }}.zip
       env:
         AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
 

@@ -86,3 +86,74 @@ jobs:
             '**/bin/Release/*.exe'
           if-no-files-found: warn
 
+name: CI .NET Framework
+
+on:
+  workflow_call:
+    inputs:
+      enableSonar:
+        type: string
+        required: false
+        default: 'true'
+        description: 'Enable SonarQube scan. Choices: true, false'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore NuGet Packages
+        run: nuget restore
+        shell: pwsh
+
+      - name: Build solution
+        run: |
+          $sln = Get-ChildItem -Path . -Filter *.sln -Recurse | Select-Object -First 1
+          msbuild $sln.FullName /p:Configuration=Release
+        shell: pwsh
+
+      - name: List Build Outputs
+        run: |
+          echo "Listing files in bin/Release:"
+          Get-ChildItem -Path "**/bin/Release/" -Recurse
+        shell: pwsh
+
+      - name: Official SonarQube Scan
+        if: ${{ inputs.enableSonar == 'true' }}
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.verbose=true
+            -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
+
+      - name: Run Tests
+        run: |
+          $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
+          if ($testFiles.Count -eq 0) {
+            Write-Host "No test assemblies found."
+          } else {
+            foreach ($file in $testFiles) {
+              & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
+            }
+          }
+        shell: pwsh
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: '**/bin/Release/*'
+          if-no-files-found: warn
