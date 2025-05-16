@@ -34,7 +34,7 @@ jobs:
     - name: Upload to Azure Storage
       run: |
         echo "Zipping files before uploading to Azure Storage..."
-        Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
+        Compress-Archive -Path .\* -DestinationPath .*/artifacts/*
         echo "Uploading zipped file to Azure Storage..."
         az storage blob upload `
           --account-name projetodotnet `
