@@ -29,9 +29,9 @@ jobs:
       #     msbuild $sln.FullName /p:Configuration=Release
       #   shell: pwsh
 
-      # # - name: Build Solution
-      # #   run: msbuild /p:Configuration=Release
-      # #   shell: pwsh
+      - name: Build Solution
+        run: msbuild /p:Configuration=Release
+        shell: pwsh
 
       # - name: Official SonarQube Scan
       #   if: ${{ inputs.enableSonar == 'true' }}
