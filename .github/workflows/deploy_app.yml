@@ -38,6 +38,10 @@ jobs:
           Write-Error "No files found to compress."
           exit 1
         }
+        # Cria o diretório artifacts se ele não existir
+        if (-not (Test-Path -Path ./artifacts)) {
+          New-Item -ItemType Directory -Path ./artifacts | Out-Null
+        }
         Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
       shell: pwsh
 
