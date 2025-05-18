@@ -11,14 +11,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: List Available Artifacts
-      run: |
-        echo "Listing available artifacts..."
-        $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts"
-        $headers = @{ Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}" }
-        $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-        $response | ConvertTo-Json -Depth 10
-      shell: pwsh
+    # - name: List Available Artifacts
+    #   run: |
+    #     echo "Listing available artifacts..."
+    #     $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts"
+    #     $headers = @{ Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}" }
+    #     $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+    #     $response | ConvertTo-Json -Depth 10
+    #   shell: pwsh
 
     - name: Download Build Artifact
       uses: actions/download-artifact@v4
@@ -31,42 +31,6 @@ jobs:
         dir /s
       shell: cmd
 
-    - name: Create ZIP from Downloaded Artifacts
-      run: |
-        echo "Creating ZIP file from downloaded artifacts..."
-        if ((Get-ChildItem -Path .\* -File).Count -eq 0) {
-          Write-Error "No files found to compress."
-          exit 1
-        }
-        # Cria o diretório artifacts se ele não existir
-        if (-not (Test-Path -Path ./artifacts)) {
-          New-Item -ItemType Directory -Path ./artifacts | Out-Null
-        }
-        # Remove o arquivo ZIP existente, se houver
-        if (Test-Path -Path ./artifacts/app.zip) {
-          Remove-Item -Path ./artifacts/app.zip -Force
-          Start-Sleep -Seconds 2
-          if (Test-Path -Path ./artifacts/app.zip) {
-            Write-Error "Failed to remove the existing ZIP file. It may still be in use."
-            exit 1
-          }
-        }
-        Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
-      shell: pwsh
-
-    - name: Upload to Azure Storage
-      run: |
-        echo "Uploading zipped file to Azure Storage..."
-        az storage blob upload `
-          --account-name projetodotnet `
-          --account-key ${{ secrets.AZURE_STORAGE_KEY }} `
-          --container-name windowsformapp `
-          --file ./artifacts/app.zip `
-          --name ${{ github.event.repository.name }}.zip
-      env:
-        AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
-
-
     # - name: Create ZIP from Downloaded Artifacts
     #   run: |
     #     echo "Creating ZIP file from downloaded artifacts..."
@@ -74,17 +38,24 @@ jobs:
     #       Write-Error "No files found to compress."
     #       exit 1
     #     }
-    #     Compress-Archive -Path .\* -DestinationPath ./artifacts/build-artifacts.zip
+    #     # Cria o diretório artifacts se ele não existir
+    #     if (-not (Test-Path -Path ./artifacts)) {
+    #       New-Item -ItemType Directory -Path ./artifacts | Out-Null
+    #     }
+    #     # Remove o arquivo ZIP existente, se houver
+    #     if (Test-Path -Path ./artifacts/app.zip) {
+    #       Remove-Item -Path ./artifacts/app.zip -Force
+    #       Start-Sleep -Seconds 2
+    #       if (Test-Path -Path ./artifacts/app.zip) {
+    #         Write-Error "Failed to remove the existing ZIP file. It may still be in use."
+    #         exit 1
+    #       }
+    #     }
+    #     Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
     #   shell: pwsh
 
     # - name: Upload to Azure Storage
     #   run: |
-    #     echo "Zipping files before uploading to Azure Storage..."
-    #     if ((Get-ChildItem -Path .\* -File).Count -eq 0) {
-    #         Write-Error "No files found to compress."
-    #         exit 1
-    #     }
-    #     Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
     #     echo "Uploading zipped file to Azure Storage..."
     #     az storage blob upload `
     #       --account-name projetodotnet `
@@ -95,7 +66,36 @@ jobs:
     #   env:
     #     AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
 
-    - name: List Blobs in Container
-      run: |
-        az storage blob list --account-name projetodotnet --account-key ${{ secrets.AZURE_STORAGE_KEY }} --container-name windowsformapp
+
+    # # - name: Create ZIP from Downloaded Artifacts
+    # #   run: |
+    # #     echo "Creating ZIP file from downloaded artifacts..."
+    # #     if ((Get-ChildItem -Path .\* -File).Count -eq 0) {
+    # #       Write-Error "No files found to compress."
+    # #       exit 1
+    # #     }
+    # #     Compress-Archive -Path .\* -DestinationPath ./artifacts/build-artifacts.zip
+    # #   shell: pwsh
+
+    # # - name: Upload to Azure Storage
+    # #   run: |
+    # #     echo "Zipping files before uploading to Azure Storage..."
+    # #     if ((Get-ChildItem -Path .\* -File).Count -eq 0) {
+    # #         Write-Error "No files found to compress."
+    # #         exit 1
+    # #     }
+    # #     Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
+    # #     echo "Uploading zipped file to Azure Storage..."
+    # #     az storage blob upload `
+    # #       --account-name projetodotnet `
+    # #       --account-key ${{ secrets.AZURE_STORAGE_KEY }} `
+    # #       --container-name windowsformapp `
+    # #       --file ./artifacts/app.zip `
+    # #       --name ${{ github.event.repository.name }}.zip
+    # #   env:
+    # #     AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+
+    # - name: List Blobs in Container
+    #   run: |
+    #     az storage blob list --account-name projetodotnet --account-key ${{ secrets.AZURE_STORAGE_KEY }} --container-name windowsformapp
 

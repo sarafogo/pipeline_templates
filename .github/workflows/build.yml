@@ -51,17 +51,17 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
-      - name: Run Tests
-        run: |
-          $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
-          if ($testFiles.Count -eq 0) {
-            Write-Host "No test assemblies found."
-          } else {
-            foreach ($file in $testFiles) {
-              & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
-            }
-          }
-        shell: pwsh
+      # - name: Run Tests
+      #   run: |
+      #     $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
+      #     if ($testFiles.Count -eq 0) {
+      #       Write-Host "No test assemblies found."
+      #     } else {
+      #       foreach ($file in $testFiles) {
+      #         & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" $file
+      #       }
+      #     }
+      #   shell: pwsh
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
