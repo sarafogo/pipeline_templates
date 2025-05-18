@@ -11,15 +11,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # - name: List Available Artifacts
-    #   run: |
-    #     echo "Listing available artifacts..."
-    #     $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts"
-    #     $headers = @{ Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}" }
-    #     $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-    #     $response | ConvertTo-Json -Depth 10
-    #   shell: pwsh
-
     - name: Download Build Artifact
       uses: actions/download-artifact@v4
       with:
@@ -67,16 +58,31 @@ jobs:
     #     AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
 
 
-    # # - name: Create ZIP from Downloaded Artifacts
-    # #   run: |
-    # #     echo "Creating ZIP file from downloaded artifacts..."
-    # #     if ((Get-ChildItem -Path .\* -File).Count -eq 0) {
-    # #       Write-Error "No files found to compress."
-    # #       exit 1
-    # #     }
-    # #     Compress-Archive -Path .\* -DestinationPath ./artifacts/build-artifacts.zip
-    # #   shell: pwsh
+    - name: Create ZIP from Downloaded Artifacts
+      run: |
+        echo "Creating ZIP file from downloaded artifacts..."
+        if ((Get-ChildItem -Path .\* -File).Count -eq 0) {
+          Write-Error "No files found to compress."
+          exit 1
+        }
+        Compress-Archive -Path .\* -DestinationPath ./artifacts/build-artifacts.zip
+      shell: pwsh
 
+    - name: Debug - Verificar ZIP dos Artefatos
+      run: |
+        echo "Verificando se o arquivo ZIP foi criado..."
+        if (Test-Path -Path ./artifacts/build-artifacts.zip) {
+          Write-Host "Arquivo ZIP encontrado:"
+          Get-Item ./artifacts/build-artifacts.zip | Format-List
+          Write-Host "Conteúdo do ZIP:"
+          Expand-Archive -Path ./artifacts/build-artifacts.zip -DestinationPath ./artifacts/zip-contents -Force
+          Get-ChildItem -Path ./artifacts/zip-contents -Recurse
+        } else {
+          Write-Error "Arquivo ZIP não encontrado!"
+          exit 1
+        }
+      shell: pwsh
+      
     # # - name: Upload to Azure Storage
     # #   run: |
     # #     echo "Zipping files before uploading to Azure Storage..."
