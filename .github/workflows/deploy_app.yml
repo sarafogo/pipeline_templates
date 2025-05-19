@@ -39,17 +39,28 @@ jobs:
     - name: Create ZIP from Downloaded Artifacts
       run: |
         echo "Creating ZIP file from downloaded artifacts..."
-        if ((Get-ChildItem -Path .\* -File).Count -eq 0) {
-          Write-Error "No files found to compress."
-          exit 1
+        # Cria diretórios temporários
+        $source = "temp"
+        $output = "artifacts"
+        if (-not (Test-Path -Path $output)) {
+          New-Item -ItemType Directory -Path $output | Out-Null
         }
-        # Cria o diretório artifacts se ele não existir
-        if (-not (Test-Path -Path ./artifacts)) {
-          New-Item -ItemType Directory -Path ./artifacts | Out-Null
+        if (-not (Test-Path -Path $source)) {
+          New-Item -ItemType Directory -Path $source | Out-Null
         }
-        Remove-Item -Path ./artifacts/build-artifacts.zip -Force -ErrorAction SilentlyContinue
-        Compress-Archive -Path .\* -DestinationPath ./artifacts/build-artifacts.zip
+        # Copia os arquivos (exceto artifacts) para a pasta temporária
+        Get-ChildItem -Path . -Exclude $output, $source | ForEach-Object {
+          Copy-Item -Path $_.FullName -Destination $source -Recurse
+        }
+        # Remove o zip anterior, se existir
+        $zipPath = Join-Path $output "build-artifacts.zip"
+        Remove-Item -Path $zipPath -Force -ErrorAction SilentlyContinue
+        # Cria o novo zip a partir da pasta temporária
+        Compress-Archive -Path "$source\*" -DestinationPath $zipPath
+        # Limpa a pasta temporária
+        Remove-Item -Path $source -Recurse -Force
       shell: pwsh
+
 
     - name: Debug - Verificar ZIP dos Artefatos
       run: |
