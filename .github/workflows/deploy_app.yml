@@ -47,6 +47,7 @@ jobs:
         if (-not (Test-Path -Path ./artifacts)) {
           New-Item -ItemType Directory -Path ./artifacts | Out-Null
         }
+        Remove-Item -Path ./artifacts/build-artifacts.zip -Force -ErrorAction SilentlyContinue
         Compress-Archive -Path .\* -DestinationPath ./artifacts/build-artifacts.zip
       shell: pwsh
 
