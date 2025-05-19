@@ -70,7 +70,7 @@ jobs:
           --account-key ${{ secrets.AZURE_STORAGE_KEY }} `
           --container-name windowsformapp `
           --file ./artifacts/build-artifacts.zip `
-          --name ${{ github.event.repository.name }}.zip
+          --name ${{ github.event.repository.name }}.zip `
           --overwrite
       env:
         AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
