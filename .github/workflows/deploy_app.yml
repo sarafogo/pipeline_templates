@@ -61,7 +61,6 @@ jobs:
         Remove-Item -Path $source -Recurse -Force
       shell: pwsh
 
-
     - name: Debug - Verificar ZIP dos Artefatos
       run: |
         echo "Verificando se o arquivo ZIP foi criado..."
@@ -77,25 +76,19 @@ jobs:
         }
       shell: pwsh
 
-    # # - name: Upload to Azure Storage
-    # #   run: |
-    # #     echo "Zipping files before uploading to Azure Storage..."
-    # #     if ((Get-ChildItem -Path .\* -File).Count -eq 0) {
-    # #         Write-Error "No files found to compress."
-    # #         exit 1
-    # #     }
-    # #     Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
-    # #     echo "Uploading zipped file to Azure Storage..."
-    # #     az storage blob upload `
-    # #       --account-name projetodotnet `
-    # #       --account-key ${{ secrets.AZURE_STORAGE_KEY }} `
-    # #       --container-name windowsformapp `
-    # #       --file ./artifacts/app.zip `
-    # #       --name ${{ github.event.repository.name }}.zip
-    # #   env:
-    # #     AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+    - name: Upload to Azure Storage
+      run: |
+        echo "Uploading zipped file to Azure Storage..."
+        az storage blob upload `
+          --account-name projetodotnet `
+          --account-key ${{ secrets.AZURE_STORAGE_KEY }} `
+          --container-name windowsformapp `
+          --file ./artifacts/build-artifacts.zip `
+          --name ${{ github.event.repository.name }}.zip
+      env:
+        AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
 
-    # - name: List Blobs in Container
-    #   run: |
-    #     az storage blob list --account-name projetodotnet --account-key ${{ secrets.AZURE_STORAGE_KEY }} --container-name windowsformapp
+    - name: List Blobs in Container
+      run: |
+        az storage blob list --account-name projetodotnet --account-key ${{ secrets.AZURE_STORAGE_KEY }} --container-name windowsformapp
 
