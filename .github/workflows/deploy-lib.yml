@@ -16,8 +16,11 @@ jobs:
       with:
         name: build-artifacts
 
-    # - name: List NuGet Packages
-    #   run: dir **/*.nupkg
+    - name: List Downloaded Files
+      run: |
+        echo "Listing downloaded files..."
+        dir /s
+      shell: cmd
 
     - name: Publish to GitHub Packages
       run: |
@@ -27,15 +30,3 @@ jobs:
         echo "Package successfully published to GitHub Packages."
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-      # - name: Publish to GitHub Packages
-      #   if: ${{ inputs.artifacts-type == 'lib' }}
-      #   run: |
-      #     echo "Starting to publish the package to GitHub Packages..."
-      #     nuget sources add -Name "github" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -Username ${{ github.actor }} -Password ${{ secrets.GITHUB_TOKEN }}
-      #     nuget push **/*.nupkg -Source "github" -SkipDuplicate
-      #     echo "Package successfully published to GitHub Packages."
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

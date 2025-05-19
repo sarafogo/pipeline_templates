@@ -22,20 +22,6 @@ jobs:
         dir /s
       shell: cmd
 
-
-    # - name: Upload to Azure Storage
-    #   run: |
-    #     echo "Uploading zipped file to Azure Storage..."
-    #     az storage blob upload `
-    #       --account-name projetodotnet `
-    #       --account-key ${{ secrets.AZURE_STORAGE_KEY }} `
-    #       --container-name windowsformapp `
-    #       --file ./artifacts/app.zip `
-    #       --name ${{ github.event.repository.name }}.zip
-    #   env:
-    #     AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
-
-
     - name: Create ZIP from Downloaded Artifacts
       run: |
         echo "Creating ZIP file from downloaded artifacts..."
