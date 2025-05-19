@@ -22,28 +22,6 @@ jobs:
         dir /s
       shell: cmd
 
-    # - name: Create ZIP from Downloaded Artifacts
-    #   run: |
-    #     echo "Creating ZIP file from downloaded artifacts..."
-    #     if ((Get-ChildItem -Path .\* -File).Count -eq 0) {
-    #       Write-Error "No files found to compress."
-    #       exit 1
-    #     }
-    #     # Cria o diretório artifacts se ele não existir
-    #     if (-not (Test-Path -Path ./artifacts)) {
-    #       New-Item -ItemType Directory -Path ./artifacts | Out-Null
-    #     }
-    #     # Remove o arquivo ZIP existente, se houver
-    #     if (Test-Path -Path ./artifacts/app.zip) {
-    #       Remove-Item -Path ./artifacts/app.zip -Force
-    #       Start-Sleep -Seconds 2
-    #       if (Test-Path -Path ./artifacts/app.zip) {
-    #         Write-Error "Failed to remove the existing ZIP file. It may still be in use."
-    #         exit 1
-    #       }
-    #     }
-    #     Compress-Archive -Path .\* -DestinationPath ./artifacts/app.zip
-    #   shell: pwsh
 
     # - name: Upload to Azure Storage
     #   run: |
@@ -65,6 +43,10 @@ jobs:
           Write-Error "No files found to compress."
           exit 1
         }
+        # Cria o diretório artifacts se ele não existir
+        if (-not (Test-Path -Path ./artifacts)) {
+          New-Item -ItemType Directory -Path ./artifacts | Out-Null
+        }
         Compress-Archive -Path .\* -DestinationPath ./artifacts/build-artifacts.zip
       shell: pwsh
 
@@ -82,7 +64,7 @@ jobs:
           exit 1
         }
       shell: pwsh
-      
+
     # # - name: Upload to Azure Storage
     # #   run: |
     # #     echo "Zipping files before uploading to Azure Storage..."
