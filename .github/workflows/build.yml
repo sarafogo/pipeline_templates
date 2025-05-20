@@ -41,7 +41,7 @@ jobs:
 
       - name: Official SonarQube Scan
         if: ${{ inputs.enableSonar == 'true' }}
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarcloud-github-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
