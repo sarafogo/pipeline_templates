@@ -8,8 +8,6 @@ on:
         required: false
         default: 'true'
         description: 'Enable SonarQube scan. Choices: true, false'
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 jobs:
   build:
