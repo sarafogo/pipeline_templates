@@ -2,12 +2,12 @@ name: CI .NET Framework
 
 on:
   workflow_call:
-    inputs:
-      enableSonar:
-        type: string
-        required: false
-        default: 'true'
-        description: 'Enable SonarQube scan. Choices: true, false'
+    # inputs:
+    #   enableSonar:
+    #     type: string
+    #     required: false
+    #     default: 'true'
+    #     description: 'Enable SonarQube scan. Choices: true, false'
 
 jobs:
   build:
