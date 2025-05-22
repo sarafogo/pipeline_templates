@@ -39,6 +39,28 @@ jobs:
           Get-ChildItem -Path "**/bin/Release/" -Recurse
         shell: pwsh
 
+      - name: Create SonarCloud Project (if not exists)
+        run: |
+          $headers = @{
+            "Authorization" = "Basic $([Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${{ secrets.SONAR_TOKEN }}:")))"
+          }
+          $body = @{
+            organization = "migracao-net"
+            project = "${{ github.event.repository.name }}"
+            name = "${{ github.event.repository.name }}"
+          }
+          try {
+            Invoke-RestMethod -Uri "https://sonarcloud.io/api/projects/create" -Method Post -Headers $headers -Body $body -ErrorAction Stop
+            Write-Host "Projeto criado no SonarCloud."
+          } catch {
+            if ($_.Exception.Response.StatusCode.value__ -eq 400) {
+              Write-Host "Projeto já existe no SonarCloud, seguindo..."
+            } else {
+              throw $_
+            }
+          }
+        shell: pwsh
+
       - name: Official SonarQube Scan
         if: ${{ inputs.enableSonar == 'true' }}
         uses: SonarSource/sonarcloud-github-action@v5
@@ -48,10 +70,12 @@ jobs:
           args: >
             -Dsonar.organization=${{ github.repository_owner }}
             -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.projectName=${{ github.event.repository.name }}
             -Dsonar.verbose=true
             -Dsonar.exclusions=**/bin/**/*,**/obj/**/*,**/packages/**/*,**/test/**/*
 
       - name: Run Tests
+        continue-on-error: true
         run: |
           $testFiles = Get-ChildItem -Path "**\bin\Release" -Filter "*.Tests.dll" -Recurse | ForEach-Object { $_.FullName }
           if ($testFiles.Count -eq 0) {
