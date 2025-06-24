@@ -1,0 +1,86 @@
+name: Deploy Java Gradle Library
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  packages: write
+       
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Set up JDK
+              uses: actions/setup-java@v4
+              with:
+                distribution: 'temurin'
+                java-version: '17'
+            
+            - name: download artifact
+              uses: actions/download-artifact@v4
+              with:
+                name: build-output
+
+            - name: Allow gradlew execution
+              run: chmod +x ./gradlew
+
+            - name: Add maven-publish plugin to build.gradle (if not present)
+              run: |
+                grep "id 'maven-publish'" build.gradle || \
+                sed -i '1s/^/plugins { id "maven-publish" }\n/' build.gradle
+
+            - name: Create temporary publish script
+              run: |
+                cat <<EOF > publish.gradle
+                allprojects {
+                    apply plugin: 'java'
+                    apply plugin: 'maven-publish'
+                    publishing {
+                        publications {
+                            mavenJava(MavenPublication) {
+                                from components.java
+                            }
+                        }
+                        repositories {
+                            maven {
+                                name = "GitHubPackages"
+                                url = uri("https://maven.pkg.github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}")
+                                credentials {
+                                    username = System.getenv("GH_USERNAME")
+                                    password = System.getenv("GH_TOKEN")
+                                }
+                            }
+                        }
+                    }
+                }
+                gradle.projectsEvaluated {
+                    allprojects {
+                        tasks.withType(GenerateModuleMetadata).configureEach {
+                            suppressedValidationErrors.add('dependencies-without-versions')
+                        }
+                    }
+                }
+                EOF
+
+            - name: Publish to GitHub Packages via init script
+              run: ./gradlew publish --init-script publish.gradle
+              env:
+                GH_USERNAME: ${{ github.actor }}
+                GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+
+            # - name: Publish to GitHub Packages
+            #   run: |
+            #     ./gradlew publish \
+            #       -PpublishingUsername=${{ github.actor }} \
+            #       -PpublishingPassword=${{ secrets.GITHUB_TOKEN }} \
+            #       -PpublishingRepo=https://maven.pkg.github.com/${{ github.actor}}/${{ github.repository }}
+            #   env:
+            #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

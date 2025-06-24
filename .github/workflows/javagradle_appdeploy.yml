@@ -1,0 +1,71 @@
+name: Deploy to Docker
+
+on:
+  workflow_call:
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+
+permissions:
+    contents: read
+    packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+       distribution: 'temurin'
+       java-version: '17'
+            
+    - name: download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: build-output
+
+    - name: Allow gradlew execution
+      run: chmod +x ./gradlew
+
+    - name: Move JAR to root as app.jar
+      run: |
+        find . -name "*.jar" -exec cp {} app.jar \;
+
+
+    - name: Generate Dockerfile
+      run: |
+        cat <<EOF > Dockerfile
+        FROM eclipse-temurin:17-jdk-alpine
+        COPY app.jar app.jar
+        ENTRYPOINT ["java", "-jar", "app.jar"]
+        EOF
+
+    - name: Login to GitHub Container Registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Build and Push Docker image
+      run: |
+        IMAGE_NAME=ghcr.io/$(echo "${{ github.repository_owner }}/${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]'):latest
+        docker build -t $IMAGE_NAME .
+        docker push $IMAGE_NAME
+
+    # - name: Print secret (debug temporário)
+    #   run: echo "${{ secrets.AZURE_CREDENTIALS }}"
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }} 
+
+    - name: Deploy to Azure Web App for Containers
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: application-java
+        images: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+        package: .
